@@ -6,4 +6,4 @@ Téma: Pomocník pro Dungeons and Dragons
 Komentáře k odevzdání:
 
 V doménovém modelu je typ atributu Range třídy Spell string, protože někdy může být složitější než jen číslo (např tvar hitboxu)
-Popis případů užití je v napsaný ve specifikacích jednotlivých případů užití v .vpp souboru.
+Popis případů užití je v napsaný ve specifikacích jednotlivých případů užití v .vpp souboru (Pro UC01-05).
