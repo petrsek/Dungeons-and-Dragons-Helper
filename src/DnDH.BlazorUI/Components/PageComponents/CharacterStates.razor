@@ -1,0 +1,135 @@
+@using DnDH.Repo
+
+<MessageHandler errorMessage="@errorMessage" successMessage="@successMessage" />
+<section class="card mb-3">
+	<div class="card-header">
+		<label>Character States</label>
+	</div>
+	<div class="card-body">
+		<table class="table table-striped table-hover">
+			<thead>
+				<tr>
+					<th>Name</th>
+					<th>State</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				@foreach (var state in states)
+				{
+					<tr>
+						<td>@state.characterName</td>
+						<td><select class="form-select" value="@stateDict[state.characterId]"
+								@onchange="e => UpdateCharacterState(state.characterId, Enum.Parse<CharacterState>(e.Value!.ToString()!))">
+							<option value="@CharacterState.Alive">Alive</option>
+							<option value="@CharacterState.Dead">Dead</option>
+						</select></td>
+						<td><button class="btn btn-danger" @onclick="(() => RemoveCharacterFromCampaign(state.characterId))">Remove</button></td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+	<div class="card-footer">
+		<div class="row">
+			<InputSelect class="form-select col-md-6" @bind-Value="selectedCharacterId" TValue="int" >
+				<option value="-1">Select a character</option>
+				@foreach (var character in unassignedCharacters)
+				{
+						<option value="@character.Id">@character.Name</option>
+				}
+			</InputSelect>
+			<button class="btn btn-primary" @onclick="AddCharacterToCampaign">Add Character</button>
+		</div>
+	</div>
+</section>
+
+@code {
+	@inject ICharacterStateService CharacterStateService;
+
+	string? errorMessage;
+	string? successMessage;
+	int selectedCharacterId = -1;
+
+	IReadOnlyList<CharacterListItemDTO> unassignedCharacters = [];
+
+	IReadOnlyList<CharacterStateDTO> states = [];
+	Dictionary<int, CharacterState> stateDict = [];
+
+	[Parameter]
+	public int CampaignId { get; set; }
+
+	void LoadStates()
+	{
+		try {
+			states = CharacterStateService.FindCharactersInCampaign(CampaignId);
+			stateDict = states.ToDictionary(s => s.characterId, s => s.State);
+		}
+		catch (Exception ex)
+		{
+			errorMessage = ex.Message;
+		}
+
+		try
+		{
+			unassignedCharacters = CharacterStateService.FindCharactersNotInCampaignByState(CampaignId);
+		}
+		catch (Exception ex)
+		{
+			errorMessage = ex.Message;
+		}
+	}
+
+	override protected void OnParametersSet()
+	{
+		base.OnParametersSet();
+		LoadStates();
+	}
+
+	void AddCharacterToCampaign()
+	{
+		if (selectedCharacterId != -1)
+		{
+			try
+			{
+				CharacterStateService.UpdateCharacterState(selectedCharacterId, CampaignId);
+				successMessage = "Character added to campaign successfully";
+				selectedCharacterId = -1;
+				LoadStates();
+			}
+			catch (Exception ex)
+			{
+				errorMessage = ex.Message;
+			}
+		}
+	}
+
+	void RemoveCharacterFromCampaign(int characterId)
+	{
+		try
+		{
+			CharacterStateService.RemoveCharacterFromCampaign(characterId, CampaignId);
+			successMessage = "Character removed from campaign successfully";
+			LoadStates();
+		}
+		catch (Exception ex)
+		{
+			errorMessage = ex.Message;
+		}
+	}
+
+	void UpdateCharacterState(int characterId, CharacterState newState)
+	{
+		try
+		{
+			CharacterStateService.UpdateCharacterState(characterId, CampaignId, newState);
+			successMessage = "Character state updated successfully";
+			LoadStates();
+		}
+		catch (Exception ex)
+		{
+			errorMessage = ex.Message;
+		}
+	}
+
+}

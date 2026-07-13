@@ -1,0 +1,39 @@
+﻿@page "/"
+@using DnDH.BlazorUI.Components.PageComponents
+@implements IDisposable
+
+@inject IUserContext UserContext
+
+<h1>Welcome to the Dungeons & Dragons Helper</h1>
+
+<p>a simple Blazor app for managing your Dungeons & Dragons campaigns and characters.</p>
+
+@if (UserContext.IsLoggedIn)
+{
+	<p><strong>Welcome, @UserContext.User!.Username!</strong></p>
+	<button class="btn btn-primary" @onclick="@(() => { 
+                    UserContext.Logout();
+                    })">Logout</button>
+}
+else
+{
+	<LoginComponent />
+}
+
+@code {
+	override protected void OnInitialized()
+	{
+		base.OnInitialized();
+		UserContext.OnUserChanged += HandelUserChanged;
+	}
+
+	void HandelUserChanged()
+	{
+		InvokeAsync(StateHasChanged);
+	}
+
+	public void Dispose()
+	{
+		UserContext.OnUserChanged -= HandelUserChanged;
+	}
+}

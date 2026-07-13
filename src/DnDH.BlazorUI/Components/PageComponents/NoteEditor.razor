@@ -1,0 +1,44 @@
+
+<div class="mb-3">
+	<div class="col-md-6">
+			<InputText class="form-control" @bind-Value="title" placeholder="Enter note title here..."/>
+	</div>
+    <InputTextArea class="form-control" @bind-Value="enteredText" placeholder="Enter note content here..."  Rows="10"/>
+	<div class = "row mt-2">
+		<div class="col-md-12">
+			<button class="btn btn-outline-success" @onclick="Save">💾 Save</button>
+            <button class="btn btn-outline-danger" @onclick="LoadNote">❌ Restore</button>
+		</div>
+	</div>
+</div>
+
+@code {
+    private string enteredText = string.Empty;
+	private string title = string.Empty;
+
+	[Parameter]
+	public NoteDTO Note { get; set; } = null!;
+
+	[Parameter]
+	public EventCallback<NoteDTO> OnSave { get; set; }
+
+	override protected void OnParametersSet()
+	{
+		base.OnParametersSet();
+		LoadNote();
+	}
+
+	void LoadNote()
+	{
+		enteredText = Note.Text;
+		title = Note.Title;
+	}
+
+	void Save()
+	{
+		Note.Text = enteredText;
+		Note.Title = title;
+		OnSave.InvokeAsync(Note);
+		LoadNote();
+	}
+}

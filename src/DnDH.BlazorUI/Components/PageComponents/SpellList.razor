@@ -1,0 +1,51 @@
+@if (spells is null)
+{
+	<p><em>Loading Data...</em></p>
+} else if(!spells.Any())
+{
+	<p>Spell list is empty</p>
+} else
+{
+	<table class="table table-striped table-hover">
+		<thead class="table-dark">
+			<tr>
+				@if (CanRemove)
+				{
+					<th>Remove</th>
+				}
+				<th>Name</th>
+				<th>Level</th>
+				<th>Range</th>
+				<th>Components</th>
+				<th>Description</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var spell in spells)
+			{
+				<tr>
+					@if (CanRemove)
+					{
+						<td><button class="btn btn-danger" @onclick="() => OnRemoveSpell.InvokeAsync(spell.Id)">🗑️</button></td>
+					}
+					<td>@spell.Name</td>
+					<td>@spell.Level</td>
+					<td>@spell.Range</td>
+					<td>@spell.Components</td>
+					<td>@spell.Description</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+
+@code {
+	[Parameter]
+	public IReadOnlyList<SpellDTO>? spells { get; set; }
+
+	[Parameter]
+	public bool CanRemove { get; set; } = false;
+
+	[Parameter]
+	public EventCallback<int> OnRemoveSpell { get; set; }
+}

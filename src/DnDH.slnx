@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="DnDH.BlazorUI/DnDH.BlazorUI.csproj" />
+  <Project Path="DnDH.Business/DnDH.Business.csproj" Id="0236b11a-86a0-45a1-aced-78788f483581" />
+  <Project Path="DnDH.ConsoleUI/DnDH.ConsoleUI.csproj" />
+  <Project Path="DnDH.Repo/DnDH.Repo.csproj" Id="d1ae8a52-3173-40d7-9c0c-80b52c339a52" />
+  <Project Path="DnDH.Test/DnDH.Test.csproj" Id="601024dd-f076-4274-a62a-a080f665e704" />
+</Solution>

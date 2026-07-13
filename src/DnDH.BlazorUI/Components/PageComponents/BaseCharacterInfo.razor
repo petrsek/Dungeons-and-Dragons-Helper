@@ -1,0 +1,97 @@
+
+<section class="card mb-3">
+        <div class="card-header">
+            Character Information
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-9">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label>Name</label>
+                            <input class="form-control" @bind="Name">
+                        </div>
+                        <div class="col-md-2">
+                            <label>Class</label>
+                            <input class="form-control" @bind="Class">
+                        </div>
+                        <div class="col-md-1">
+                            <label>Level</label>
+                            <input class="form-control" @bind="Level">
+                        </div>
+                        <div class="col-md-2">
+                            <label>Race</label>
+                            <input class="form-control" @bind="Race">
+                        </div>
+                    </div>
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-2">
+                            <label>Speed</label>
+                            <input class="form-control" @bind="Speed">
+                        </div>
+                        <div class="col-md-2">
+                            <label>Armor Class</label>
+                            <input class="form-control" @bind="ArmorClass">
+                        </div>
+                    </div>
+                </div>
+				<div class="col-md-3">
+					<label>Actions</label>
+					<div>
+						<button class="btn btn-outline-success" @onclick="Save">💾 Save</button>
+						<button class="btn btn-outline-danger" @onclick="LoadCharacter">❌ Restore</button>
+					</div>
+				</div>
+
+				</div>
+            </div>
+
+    </section>
+
+@code {
+    string Name = string.Empty;
+    int Level;
+    string Race = string.Empty;
+    string Class = string.Empty;
+    int Speed;
+    int ArmorClass;
+
+    [Parameter]
+    public CharacterDTO? Character { get; set; }
+
+	[Parameter]
+	public EventCallback OnSave { get; set; }
+
+    void LoadCharacter()
+    {
+        if (Character is not null)
+        {
+            Name = Character.Name;
+            Level = Character.Level;
+            Race = Character.Race;
+            Class = Character.Class;
+            Speed = Character.Speed;
+            ArmorClass = Character.ArmorClass;
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+		LoadCharacter();
+    }
+
+	void Save()
+	{
+		if (Character is not null)
+		{
+			Character.Name = Name;
+			Character.Level = Level;
+			Character.Race = Race;
+			Character.Class = Class;
+            Character.Speed = Speed;
+            Character.ArmorClass = ArmorClass;
+			OnSave.InvokeAsync();
+		}
+	}
+}

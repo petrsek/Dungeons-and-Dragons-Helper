@@ -1,0 +1,67 @@
+﻿@inject IUserContext UserContext
+@implements IDisposable
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">DnD Helper</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="nav flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="spells">
+                <span aria-hidden="true"></span> Spells
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="@linkClass" href="characters">
+                <span aria-hidden="true"></span> Characters
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="@linkClass" href="campaigns">
+                <span aria-hidden="true"></span> Campaigns
+            </NavLink>
+        </div>
+    </nav>
+</div>
+
+@code {
+    string linkClass = "nav-link disabled";
+	override protected void OnInitialized()
+	{
+		base.OnInitialized();
+		UserContext.OnUserChanged += HandleUserChanged;
+        // Call always in case of refreshing the page, so the linkClass is set correctly
+        HandleUserChanged();
+	}
+
+    void HandleUserChanged()
+    {
+        if (UserContext.IsLoggedIn)
+        {
+            linkClass = "nav-link ";
+        }
+        else
+        {
+            linkClass = "nav-link disabled";
+        }
+        InvokeAsync(StateHasChanged);
+    }
+
+	public void Dispose()
+	{
+		UserContext.OnUserChanged -= HandleUserChanged;
+	}
+
+}

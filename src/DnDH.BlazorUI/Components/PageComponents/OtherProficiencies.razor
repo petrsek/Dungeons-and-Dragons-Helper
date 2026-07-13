@@ -1,0 +1,43 @@
+<div class="col-lg-3">
+	<section class="card mb-5">
+		<div class="card-header">Other Proficiencies</div>
+		<div class="card-body">
+			<textarea class="form-control" rows="12" @bind="Proficiencies" />
+		</div>
+		<div class="card-footer">
+			<button class="btn btn-outline-success" @onclick="Save">💾 Save</button>
+			<button class="btn btn-outline-danger" @onclick="LoadProficiencies">❌ Restore</button>
+		</div>
+	</section>
+</div>
+
+@code {
+
+	[Parameter]
+    public CharacterDTO? Character { get; set; }
+
+	[Parameter]
+	public EventCallback OnSave { get; set; }
+
+	string Proficiencies = string.Empty;
+
+    void LoadProficiencies()
+    {
+        if (Character is not null)
+        {
+			Proficiencies = string.Join(Environment.NewLine, Character.OtherProficiencies);
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+		LoadProficiencies();
+    }
+
+	void Save()
+	{
+		Character?.OtherProficiencies = Proficiencies.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList();
+		OnSave.InvokeAsync();
+	}
+}

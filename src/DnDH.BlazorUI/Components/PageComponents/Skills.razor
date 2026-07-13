@@ -1,0 +1,43 @@
+<div class="col-lg-3">
+	<section class="card mb-3">
+		<div class="card-header">Skill Proficiencies (1 per line)</div>
+		<div class="card-body">
+			<textarea class="form-control" rows="12" @bind="SkillList" />
+		</div>
+		<div class="card-footer">
+			<button class="btn btn-outline-success" @onclick="Save">💾 Save</button>
+			<button class="btn btn-outline-danger" @onclick="LoadSkills">❌ Restore</button>
+		</div>
+	</section>
+</div>
+
+@code {
+
+	[Parameter]
+    public CharacterDTO? Character { get; set; }
+
+	[Parameter]
+	public EventCallback OnSave { get; set; }
+
+	string SkillList = string.Empty;
+
+    void LoadSkills()
+    {
+        if (Character is not null)
+        {
+			SkillList = string.Join(Environment.NewLine, Character.Skills);
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+		LoadSkills();
+    }
+
+	void Save()
+	{
+		Character?.Skills = SkillList.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList();
+		OnSave.InvokeAsync();
+	}
+}

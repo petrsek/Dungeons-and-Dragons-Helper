@@ -1,0 +1,43 @@
+<div class="col-lg-3">
+	<section class="card mb-3">
+		<div class="card-header">Saving Throw Proficiencies (1 per line)</div>
+		<div class="card-body">
+			<textarea class="form-control" rows="6" @bind="SavingThrowList" />
+		</div>
+		<div class="card-footer">
+			<button class="btn btn-outline-success" @onclick="Save">💾 Save</button>
+			<button class="btn btn-outline-danger" @onclick="LoadSavingThrows">❌ Restore</button>
+		</div>
+	</section>
+</div>
+
+@code {
+
+	[Parameter]
+    public CharacterDTO? Character { get; set; }
+
+	[Parameter]
+	public EventCallback OnSave { get; set; }
+
+	string SavingThrowList = string.Empty;
+
+    void LoadSavingThrows()
+    {
+        if (Character is not null)
+        {
+			SavingThrowList = string.Join(Environment.NewLine, Character.SavingThrows);
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+		LoadSavingThrows();
+    }
+
+	void Save()
+	{
+		Character?.SavingThrows = SavingThrowList.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList();
+		OnSave.InvokeAsync();
+	}
+}

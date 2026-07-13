@@ -1,0 +1,284 @@
+@page "/characters/{str_id}"
+@using DnDH.BlazorUI.Components.PageComponents
+
+<MessageHandler successMessage=@successMessage errorMessage=@errorMessage />
+<a class="btn btn-outline-secondary mb-3" href="/characters">← Back to list</a>
+<h1> @character?.Name </h1>
+<div class="container-fluid p-4">
+	<BaseCharacterInfo Character=@character OnSave=@SaveBaseInfo />
+	<div class="row">
+		<AbilityScores Character=@character OnSave=@SaveAbilities />
+		<Skills Character=@character OnSave=@SaveSkills />
+		<SavingThrows Character=@character OnSave=@SaveSavingThrows />
+		<Health Character=@character OnSave=@SaveHealth />
+	</div>
+	<div class="row">
+		<OtherProficiencies Character=@character OnSave=@SaveOtherProficiencies />
+		<Inventory Character=@character OnSave=@SaveInventory />
+	</div>
+	<Spellcasting Character=@character 
+	OnSave=@SaveSpellcasting 
+	OnToggleSpellcasting=@ToggleSpellcasting 
+	OnRemoveSpell=@RemoveSpell
+	OnAddSpell=@AddSpell
+	/>
+</div>
+
+@code {
+	[Parameter]
+	public string str_id { get; set; } = string.Empty;
+	public int id {
+		get
+		{
+			if (int.TryParse(str_id, out int parsedId))
+			{
+				return parsedId;
+			}
+			else
+			{
+				errorMessage = "Invalid id parameter";
+				return -1;
+			}
+		}
+	}
+	@inject ICharacterService CharacterService
+	CharacterDTO? character;
+	string? errorMessage;
+	string? successMessage;
+
+	override protected void OnInitialized()
+	{
+		base.OnInitialized();
+
+		LoadCharacter();
+	}
+
+	void LoadCharacter()
+	{
+		try
+		{
+			character = CharacterService.GetDetail(id);
+		}
+		catch (Exception ex)
+		{
+			errorMessage = ex.Message;
+		}
+	} 
+
+	void SaveBaseInfo() 
+	{
+		try
+		{
+			if (character is not null)
+			{
+				character = CharacterService.UpdateBase(
+					character.Id, 
+					character.Name, 
+					character.Level, 
+					character.Race, 
+					character.Class,
+					character.Speed,
+					character.ArmorClass);
+				successMessage = "Base character info updated successfully.";
+			}
+		}
+		catch (Exception ex)
+		{
+			errorMessage = ex.Message;
+		}
+	}
+
+	void SaveAbilities()
+	{
+		try
+		{
+			if (character is not null)
+			{
+				character = CharacterService.UpdateAbilities(
+					character.Id,
+					character.Abilities.Strength,
+					character.Abilities.Dexterity,
+					character.Abilities.Constitution,
+					character.Abilities.Intelligence,
+					character.Abilities.Wisdom,
+					character.Abilities.Charisma);
+				successMessage = "Character abilities updated successfully.";
+			}
+		}
+		catch (Exception ex)
+		{
+			errorMessage = ex.Message;
+		}
+	}
+
+	void SaveSkills()
+	{
+		try
+		{
+			if (character is not null)
+			{
+				character = CharacterService.UpdateBase(
+					character.Id,
+					skills:character.Skills);
+				successMessage = "Character skills updated successfully.";
+			}
+		}
+		catch (Exception ex)
+		{
+			errorMessage = ex.Message;
+		}
+	}
+
+	void SaveSavingThrows()
+	{
+		try
+		{
+			if (character is not null)
+			{
+				character = CharacterService.UpdateBase(
+					character.Id,
+					SavingThrows:character.SavingThrows);
+				successMessage = "Character saving throws updated successfully.";
+			}
+		}
+		catch (Exception ex)
+		{
+			errorMessage = ex.Message;
+		}
+	}
+
+	void SaveHealth()
+	{
+		try
+		{
+			if (character is not null)
+			{
+				character = CharacterService.UpdateHealth(
+					character.Id,
+					character.Health.HitPoints,
+					character.Health.MaxHitPoints,
+					character.Health.HitDice,
+					character.Health.MaxHitDice);
+				successMessage = "Character health info updated successfully.";
+			}
+		}
+		catch (Exception ex)
+		{
+			errorMessage = ex.Message;
+		}
+	}
+
+	void SaveOtherProficiencies()
+	{
+		try
+		{
+			if (character is not null)
+			{
+				character = CharacterService.UpdateBase(
+					character.Id,
+					OtherProficiencies: character.OtherProficiencies);
+				successMessage = "Character other proficiencies updated successfully.";
+			}
+		}
+		catch (Exception ex)
+		{
+			errorMessage = ex.Message;
+		}
+	}
+
+	void SaveInventory()
+	{
+		try
+		{
+			if (character is not null)
+			{
+				character = CharacterService.UpdateInventory(
+					character.Id,
+					character.Inventory.Gold,
+					character.Inventory.EquippedItems,
+					character.Inventory.OtherItems);
+				successMessage = "Character inventory updated successfully.";
+			}
+		}
+		catch (Exception ex)
+		{
+			errorMessage = ex.Message;
+		}
+	}
+
+	void SaveSpellcasting()
+	{
+		try
+		{
+			if (character is not null && character.Spellcasting is not null)
+			{
+				character = CharacterService.UpdateSpellcasting(
+					character.Id,
+					character.Spellcasting.SpellcastingAbility,
+					character.Spellcasting.SpellSlots,
+					character.Spellcasting.MaxSpellSlots);
+				successMessage = "Character spellcasting info updated successfully.";
+			}
+		}
+		catch (Exception ex)
+		{
+			errorMessage = ex.Message;
+		}
+	}
+
+	void ToggleSpellcasting(bool enable)
+	{
+		try
+		{
+			if (character is not null)
+			{
+				if (enable)
+				{
+					character = CharacterService.AddSpellcasting(character.Id);
+					successMessage = "Spellcasting added to character.";
+				}
+				else
+				{
+					character = CharacterService.RemoveSpellcasting(character.Id);
+					successMessage = "Spellcasting removed from character.";
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			errorMessage = ex.Message;
+		}
+	}
+
+	void RemoveSpell(int spellId)
+	{
+		try
+		{
+			if (character is not null && character.Spellcasting is not null)
+			{
+				character = CharacterService.RemoveSpell(character.Id, spellId);
+				successMessage = "Spell removed from character.";
+			}
+		}
+		catch (Exception ex)
+		{
+			errorMessage = ex.Message;
+		}
+	}
+
+	void AddSpell(int spellId)
+	{
+		try
+		{
+			if (character is not null && character.Spellcasting is not null)
+			{
+				character = CharacterService.AddSpell(character.Id, spellId);
+				successMessage = "Spell added to character.";
+			}
+		}
+		catch (Exception ex)
+		{
+			errorMessage = ex.Message;
+		}
+	}
+}

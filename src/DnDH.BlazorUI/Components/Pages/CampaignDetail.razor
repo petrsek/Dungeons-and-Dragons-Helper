@@ -1,0 +1,57 @@
+@page "/campaigns/{str_id}"
+@using DnDH.BlazorUI.Components.PageComponents
+
+<MessageHandler successMessage=@successMessage errorMessage=@errorMessage />
+<a class="btn btn-outline-secondary mb-3" href="/campaigns">← Back to list</a>
+<h1> @campaign?.Name </h1>
+<div class="container-fluid p-4">
+	<div class="row">
+		<div class="col-md-5">
+			<NoteList CampaignId=@id/>
+		</div>
+		<div class="col-md-7">
+			<CharacterStates CampaignId=@id />
+		</div>
+	</div>
+</div>
+
+@code {
+	[Parameter]
+	public string str_id { get; set; } = string.Empty;
+	public int id {
+		get
+		{
+			if (int.TryParse(str_id, out int parsedId))
+			{
+				return parsedId;
+			}
+			else
+			{
+				errorMessage = "Invalid id parameter";
+				return -1;
+			}
+		}
+	}
+	@inject ICampaignService CampaignService
+	CampaignDTO? campaign;
+	string? errorMessage { get; set; } = null;
+	string? successMessage { get; set; } = null;
+
+	override protected void OnInitialized()
+	{
+		base.OnInitialized();
+		LoadCampaign();
+	}
+
+	void LoadCampaign()
+	{
+		try
+		{
+			campaign = CampaignService.GetDetail(id);
+		}
+		catch (Exception ex)
+		{
+			errorMessage = ex.Message;
+		}
+	}
+}

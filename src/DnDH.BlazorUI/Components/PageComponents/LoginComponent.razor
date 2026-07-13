@@ -1,0 +1,33 @@
+﻿@inject IUserContext UserContext
+@inject IAuthService AuthService
+
+<MessageHandler errorMessage="@errorMessage" />
+
+<div class="card">
+<h3 class="card-header">Login</h3>
+	<div class="card-body">
+		<div class="row mb-2">
+			<div class="col-md-4"><input class="form-control" placeholder="Username" @bind="username" /></div>
+		</div>
+		<div class="row">
+			<div class="col-md-4"><button class="btn btn-primary" @onclick="LoginUser">Login</button> </div>
+		</div>
+	</div>
+</div>
+
+@code {
+	string? errorMessage = null;
+	string username = string.Empty;
+	void LoginUser()
+	{
+		try 
+		{
+			var user = AuthService.FindUserByLogin(username, string.Empty);
+			UserContext.Login(user);
+		}
+		catch (Exception ex)
+		{
+			errorMessage = ex.Message;
+		}
+	}
+}

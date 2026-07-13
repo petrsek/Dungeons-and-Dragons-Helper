@@ -1,0 +1,110 @@
+<div class="col-lg-3">
+	<section class="card mb-3">
+		<div class="card-header">Abilities</div>
+		<div class="card-body">
+			<table>
+				<tr>
+					<td>Strength</td>
+					<td>(@StrengthMod)</td>
+					<td class="col-lg-5"><input class="form-control" type="number" @bind="Strength" /></td>
+				</tr>
+				<tr>
+					<td>Dexterity</td>
+					<td>(@DexterityMod)</td>
+					<td class="col-lg-5"><input class="form-control" type="number" @bind="Dexterity" /></td>
+				</tr>
+				<tr>
+					<td>Constitution</td>
+					<td>(@ConstitutionMod)</td>
+					<td class="col-lg-5"><input class="form-control" type="number" @bind="Constitution" /></td>
+				</tr>
+				<tr>
+					<td>Intelligence</td>
+					<td>(@IntelligenceMod)</td>
+					<td class="col-lg-5"><input class="form-control" type="number" @bind="Intelligence" /></td>
+				</tr>
+				<tr>
+					<td>Wisdom</td>
+					<td>(@WisdomMod)</td>
+					<td class="col-lg-5"><input class="form-control" type="number" @bind="Wisdom" /></td>
+				</tr>
+				<tr>
+					<td>Charisma</td>
+					<td>(@CharismaMod)</td>
+					<td class="col-lg-5"><input class="form-control" type="number" @bind="Charisma" /></td>
+				</tr>
+			</table>
+		</div>
+		<div class="card-footer">
+			<button class="btn btn-outline-success" @onclick="Save">💾 Save</button>
+			<button class="btn btn-outline-danger" @onclick="LoadAbilities">❌ Restore</button>
+		</div>
+	</section>
+</div>
+
+@code {
+	int Strength;
+	int Dexterity;
+	int Constitution;
+	int Intelligence;
+	int Wisdom;
+	int Charisma;
+
+	int StrengthMod;
+	int DexterityMod;
+	int ConstitutionMod;
+	int IntelligenceMod;
+	int WisdomMod;
+	int CharismaMod;
+
+    [Parameter]
+    public CharacterDTO? Character { get; set; }
+
+	[Parameter]
+	public EventCallback OnSave { get; set; }
+
+	AbilitiesDTO? Abilities => Character?.Abilities;
+
+    void LoadAbilities()
+    {
+        if (Abilities is not null)
+        {
+			var abilities = Abilities.Value;
+            Strength = abilities.Strength;
+            Dexterity = abilities.Dexterity;
+            Constitution = abilities.Constitution;
+            Intelligence = abilities.Intelligence;
+            Wisdom = abilities.Wisdom;
+            Charisma = abilities.Charisma;
+			StrengthMod = abilities.StrengthModifier;
+			DexterityMod = abilities.DexterityModifier;
+			ConstitutionMod = abilities.ConstitutionModifier;
+			IntelligenceMod = abilities.IntelligenceModifier;
+			WisdomMod = abilities.WisdomModifier;
+			CharismaMod = abilities.CharismaModifier;
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+		LoadAbilities();
+    }
+
+	void Save()
+	{
+		if (Abilities is not null)
+		{
+			Character?.Abilities = new AbilitiesDTO
+			{
+				Strength = Strength,
+				Dexterity = Dexterity,
+				Constitution = Constitution,
+				Intelligence = Intelligence,
+				Wisdom = Wisdom,
+				Charisma = Charisma
+			};
+			OnSave.InvokeAsync();
+		}
+	}
+}

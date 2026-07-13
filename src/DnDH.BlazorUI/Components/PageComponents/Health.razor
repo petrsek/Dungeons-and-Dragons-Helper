@@ -1,0 +1,79 @@
+<div class="col-lg-3">
+            <section class="card mb-3">
+                <div class="card-header">Health</div>
+                <div class="card-body">
+                    <div>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label>Hit Points</label>
+                                <input class="form-control" @bind="CurrentHP">
+                            </div>
+                            <div class="col-6">
+                                <label>Max Hit Points</label>
+                                <input class="form-control" @bind="MaxHP">
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label>Hit Dice</label>
+                                <input class="form-control" @bind="HitDice">
+                            </div>
+                            <div class="col-6">
+                                <label>Max Hit Dice</label>
+                                <input class="form-control" @bind="MaxHitDice">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-outline-success" @onclick="Save">💾 Save</button>
+                    <button class="btn btn-outline-danger" @onclick="LoadHealth">❌ Restore</button>
+                </div>
+            </section>
+        </div>
+
+@code {
+
+	[Parameter]
+    public CharacterDTO? Character { get; set; }
+
+	[Parameter]
+	public EventCallback OnSave { get; set; }
+
+	int CurrentHP;
+    int MaxHP;
+    string HitDice = string.Empty;
+    string MaxHitDice = string.Empty;
+
+    void LoadHealth()
+    {
+        if (Character is not null)
+        {
+			CurrentHP = Character.Health.HitPoints;
+            MaxHP = Character.Health.MaxHitPoints;
+            HitDice = Character.Health.HitDice;
+            MaxHitDice = Character.Health.MaxHitDice;
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+		LoadHealth();
+    }
+
+	void Save()
+	{
+		if (Character is not null)
+		{
+            Character.Health = new HealthDTO
+            {
+                HitPoints = CurrentHP,
+                MaxHitPoints = MaxHP,
+                HitDice = HitDice,
+                MaxHitDice = MaxHitDice
+            };
+		}
+		OnSave.InvokeAsync();
+	}
+}

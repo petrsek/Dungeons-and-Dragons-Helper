@@ -1,0 +1,137 @@
+
+<MessageHandler errorMessage="@errorMessage" successMessage="@successMessage" />
+@if (notes is null)
+{
+	<p><em>Loading data...</em></p>
+} else
+{
+	<table class="table table-striped table-hover overflow-auto mh-100">
+		<thead class="table-dark">
+			<tr>
+				<th class="col-md-2">Title</th>
+				<th class="col-md-3">Updated</th>
+				<th class="col-md-2"></th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var note in notes)
+			{
+				<tr>
+					@if (showingDetailForId == note.Id)
+					{
+						<td colspan="3">
+							<NoteEditor Note="@note" OnSave="SaveNote"/>
+							<div class="text-end">
+								<button class="btn btn-secondary mb-2" @onclick="() => showingDetailForId = -1">❌ Close</button>
+							</div>
+						</td>
+					} else
+					{
+					<td>@note.Title</td>
+					<td>@note.TimeOfUpdate</td>
+					<td class="text-end">
+						<button class="btn btn-outline-info" @onclick="() => showingDetailForId = note.Id">✏️</button>
+						<button class="btn btn-outline-danger" @onclick="() => DeleteNote(note.Id)">🗑️</button>
+					</td>
+					}
+				</tr>
+			}
+			<tr>
+				@if (addingNew)
+				{
+					<td><input class="form-control" @bind="newTitle"/></td>
+					<td colspan="4">
+						<button class="btn btn-outline-success" @onclick="SaveNewNote">💾</button>
+						<button class="btn btn-outline-danger" @onclick="StopAddingNew">❌</button>
+					</td>
+				} else
+				{
+					<td colspan="3">
+						<button class="btn btn-primary" @onclick="() => addingNew = true">Add new note</button>
+					</td>
+				}
+			</tr>
+		</tbody>
+	</table>
+}
+@code {
+	@inject INoteService NoteService
+	@inject ICampaignService CampaignService
+	[Parameter]
+	public int CampaignId { get; set; }
+	int showingDetailForId = -1;
+	bool addingNew = false;
+	string newTitle = "";
+
+	IReadOnlyList<NoteDTO>? notes;
+	
+
+	string? errorMessage = null;
+	string? successMessage = null;
+
+	override protected void OnInitialized()
+	{
+		base.OnInitialized();
+
+		LoadNotes();
+	}
+
+	void LoadNotes() {
+		try
+		{
+			notes = NoteService.GetCampaignNotes(CampaignId);
+		}
+		catch (Exception ex)
+		{
+			errorMessage = ex.Message;
+		}
+	}
+
+	void StopAddingNew() {
+		addingNew = false;
+		newTitle = "";
+		Console.WriteLine(successMessage);
+	}
+
+	void SaveNewNote() {
+		try
+		{
+			var newNote = NoteService.Add(CampaignId, newTitle);
+			successMessage = "New note created successfully.";
+			StopAddingNew();
+			LoadNotes();
+		}
+		catch (Exception ex)
+		{
+			errorMessage = ex.Message;
+		}
+	}
+
+	void DeleteNote(int id)
+	{
+		try
+		{
+			NoteService.Delete(id);
+			successMessage = "Note deleted successfully.";
+			LoadNotes();
+		}
+		catch (Exception ex)
+		{
+			errorMessage = ex.Message;
+		}
+	}
+
+	void SaveNote(NoteDTO note)
+	{
+		try
+		{
+			NoteService.Update(note.Id, note.Title, note.Text);
+			successMessage = "Note updated successfully.";
+			LoadNotes();
+		}
+		catch (Exception ex)
+		{
+			errorMessage = ex.Message;
+		}
+	}
+}

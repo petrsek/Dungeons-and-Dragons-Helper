@@ -1,0 +1,176 @@
+<section class="card mb-3">
+	<div class="card-header">
+		Spellcasting
+	</div>
+	@if (Character is null || Character.Spellcasting is null)
+	{
+	<div class="card-body">
+		<p>This character can not cast spells.</p>
+	</div>
+	<div class="card-footer text-end">
+		<button class="btn btn-primary" @onclick="() => OnToggleSpellcasting.InvokeAsync(true)">Add Spellcasting</button>
+	</div>
+	}
+	else
+	{
+	<div class="card-body">
+		<div class="row g-3">
+			<div class="col-md-2">
+				<label>Spellcasting Ability</label>
+				<input class="form-control" @bind="SpellcastingAbility">
+			</div>
+			<div class = "col-md-10">
+				<table class="table table-striped table-hover">
+					<thead>
+						<tr>
+							<th class="col-md-2">Level</th>
+							<th class="col-md-1">1</th>
+							<th class="col-md-1">2</th>
+							<th class="col-md-1">3</th>
+							<th class="col-md-1">4</th>
+							<th class="col-md-1">5</th>
+							<th class="col-md-1">6</th>
+							<th class="col-md-1">7</th>
+							<th class="col-md-1">8</th>
+							<th class="col-md-1">9</th>									
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Spell Slots</td>
+							<td><input class="form-control" type="number" @bind="SpellSlots[0]" /></td>
+							<td><input class="form-control" type="number" @bind="SpellSlots[1]" /></td>
+							<td><input class="form-control" type="number" @bind="SpellSlots[2]" /></td>
+							<td><input class="form-control" type="number" @bind="SpellSlots[3]" /></td>
+							<td><input class="form-control" type="number" @bind="SpellSlots[4]" /></td>
+							<td><input class="form-control" type="number" @bind="SpellSlots[5]" /></td>
+							<td><input class="form-control" type="number" @bind="SpellSlots[6]" /></td>
+							<td><input class="form-control" type="number" @bind="SpellSlots[7]" /></td>
+							<td><input class="form-control" type="number" @bind="SpellSlots[8]" /></td>
+						</tr>
+						<tr>
+							<td>Maximum Spell Slots</td>
+							<td><input class="form-control" type="number" @bind="MaxSpellSlots[0]" /></td>
+							<td><input class="form-control" type="number" @bind="MaxSpellSlots[1]" /></td>
+							<td><input class="form-control" type="number" @bind="MaxSpellSlots[2]" /></td>
+							<td><input class="form-control" type="number" @bind="MaxSpellSlots[3]" /></td>
+							<td><input class="form-control" type="number" @bind="MaxSpellSlots[4]" /></td>
+							<td><input class="form-control" type="number" @bind="MaxSpellSlots[5]" /></td>
+							<td><input class="form-control" type="number" @bind="MaxSpellSlots[6]" /></td>
+							<td><input class="form-control" type="number" @bind="MaxSpellSlots[7]" /></td>
+							<td><input class="form-control" type="number" @bind="MaxSpellSlots[8]" /></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	<div class="card-footer">
+		<button class="btn btn-outline-success" @onclick="Save">💾 Save</button>
+		<button class="btn btn-outline-danger" @onclick="LoadSpellcasting">❌ Restore</button>
+		<div class="text-end">
+			<button class="btn btn-danger" @onclick="() => OnToggleSpellcasting.InvokeAsync(false)">🗑️ Remove Spellcasting</button>
+		</div>
+	</div>
+	}
+</section>
+
+@if (Character is not null && Character.Spellcasting is not null)
+{
+<section class="card mb-3">
+	<div class="card-header">
+		<label>Known Spells</label>
+	</div>
+	<div class="card-body">
+		<SpellList spells="knownSpells" CanRemove="true" OnRemoveSpell="OnRemoveSpell" />
+	</div>
+	<div class="card-footer">
+		<div class="row">
+			<InputSelect class="form-select col-md-6" @bind-Value="selectedSpellId" TValue="int" >
+				<option value="-1">Select a spell to add</option>
+				@foreach (var spell in allSpells)
+				{
+					if (!knownSpells.Any(s => s.Id == spell.Key))
+					{
+						<option value="@spell.Key">@spell.Value</option>
+					}
+				}
+			</InputSelect>
+			<button class="btn btn-primary" @onclick="AddSpell">Add Spell</button>
+		</div>
+	</div>
+</section>
+}
+
+
+@code {
+	@inject ISpellService SpellService;
+    string SpellcastingAbility = string.Empty;
+	int[] SpellSlots = new int[9];
+	int[] MaxSpellSlots = new int[9];
+	int selectedSpellId = -1;
+
+	Dictionary<int, string> allSpells = [];
+
+	List<SpellDTO> knownSpells = [];
+
+    [Parameter]
+    public CharacterDTO? Character { get; set; }
+
+	[Parameter]
+	public EventCallback OnSave { get; set; }
+
+	[Parameter]
+	public EventCallback<bool> OnToggleSpellcasting { get;set; }
+	[Parameter]
+	public EventCallback<int> OnRemoveSpell { get; set; }
+	[Parameter]
+	public EventCallback<int> OnAddSpell { get; set; }
+
+	void AddSpell() 
+	{
+		OnAddSpell.InvokeAsync(selectedSpellId);
+		selectedSpellId = -1;
+	}
+
+    void LoadSpellcasting()
+    {
+        if (Character is not null && Character.Spellcasting is not null)
+        {
+            SpellcastingAbility = Character.Spellcasting.SpellcastingAbility;
+            var spellSlotList = Character.Spellcasting.SpellSlots;
+            var maxSpellSlotList = Character.Spellcasting.MaxSpellSlots;
+
+			for (int i = 0; i < 9; i++) {
+				SpellSlots[i] = i < spellSlotList.Count ? spellSlotList[i] : 0;
+				MaxSpellSlots[i] = i < maxSpellSlotList.Count ? maxSpellSlotList[i] : 0;
+			}
+			knownSpells = Character.Spellcasting.KnownSpells.ToList();
+		}
+	}
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+		LoadSpellcasting();
+    }
+
+	protected override void OnInitialized()
+	{
+		base.OnInitialized();
+		var spellList = SpellService.GetAll();
+		allSpells = spellList.ToDictionary(s => s.Id, s => s.Name);
+	}
+
+	void Save()
+	{
+		if (Character is not null && Character.Spellcasting is not null)
+		{
+			Character.Spellcasting.SpellcastingAbility = SpellcastingAbility;
+			Character.Spellcasting.SpellSlots = SpellSlots.ToList();
+			Character.Spellcasting.MaxSpellSlots = MaxSpellSlots.ToList();
+			Character.Spellcasting.KnownSpells = knownSpells;
+			OnSave.InvokeAsync();
+		}
+	}
+}

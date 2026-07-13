@@ -1,0 +1,17 @@
+@page "/spells"
+@using DnDH.BlazorUI.Components.PageComponents
+
+<h1>Spells</h1>
+
+<SpellList spells=@spells />
+
+@code {
+	@inject ISpellService SpellService
+	IReadOnlyList<SpellDTO>? spells;
+
+	override protected void OnInitialized()
+	{
+		base.OnInitialized();
+		spells = SpellService.GetAll();
+	}
+}
